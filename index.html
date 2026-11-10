@@ -1,132 +1,109 @@
-<!DOCTYPE html>
-<html lang="en">
-
+<!doctype html>
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" href="tp/logo.png" type="image/x-icon">
-    <link rel="stylesheet" href="css/styles.css">
-    <title>天狮俱乐部
-    </title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>跳转中…</title>
+<script>
+/* ============================================================
+ * 静态跳转网关（11 版，部署在 mjwebN.xyz 等域名上，纯静态托管即可）
+ *
+ * 流程：页面加载 → 请求中心 API 查询当前路径
+ *        有配置 → 跳到配置目标
+ *        没配置/查询失败 → 跳到兜底地址
+ *
+ * 修改配置：只改下面「配置区」四行。
+ * ============================================================ */
+(function () {
+  'use strict';
+
+  // ================= 配置区 =================
+  var API      = 'https://td1888.xyz/api11'; // 中心查询接口（11 版）
+  var KEY      = '';                         // 中心后台设置了 API Key 才需要填
+  var FALLBACK = 'https://mjweb207.xyz';       // 查询失败时的兜底地址
+  var TIMEOUT  = 1000;                       // 查询超时（毫秒），超时走兜底
+  // ==========================================
+
+  var path = location.pathname;
+  if (path.length > 1 && path.charAt(path.length - 1) === '/') {
+    path = path.slice(0, -1); // /1/ → /1
+  }
+
+  var url = API + (API.indexOf('?') >= 0 ? '&' : '?')
+    + 'path=' + path
+    + '&d=' + encodeURIComponent(location.hostname)
+    + (KEY ? '&key=' + encodeURIComponent(KEY) : '');
+
+  var done = false;
+
+  function showArrived() {
+    document.title = '已到达';
+    if (document.body) {
+      document.body.innerHTML = '<p style="font-family:sans-serif;padding:24px">已到达目标页面（配置目标指向了当前地址）</p>';
+    }
+  }
+
+  function go(target) {
+    if (typeof target !== 'string' || !/^https?:\/\//i.test(target)) {
+      return false;
+    }
+    // 防死循环：目标恰好是当前地址时不跳
+    var cur = location.href.split('#')[0].replace(/\/+$/, '');
+    var tgt = target.split('#')[0].replace(/\/+$/, '');
+    if (cur === tgt) {
+      showArrived();
+      return true;
+    }
+    location.replace(target);
+    return true;
+  }
+
+  function finish(target) {
+    if (done) { return; }
+    if (go(target)) { done = true; return; }
+    fallback();
+  }
+
+  function fallback() {
+    if (done) { return; }
+    done = true;
+    if (!go(FALLBACK)) { showArrived(); }
+  }
+
+  // 防白屏：总超时兜底
+  setTimeout(fallback, TIMEOUT + 500);
+
+  if (!window.fetch) {
+    fallback();
+    return;
+  }
+
+  var controller = null;
+  if ('AbortController' in window) {
+    controller = new AbortController();
+    setTimeout(function () { try { controller.abort(); } catch (e) {} }, TIMEOUT);
+  }
+
+  fetch(url, controller ? { signal: controller.signal } : {})
+    .then(function (r) { return r.json(); })
+    .then(function (j) {
+      if (j && j.ok && j.target) {
+        finish(j.target);
+      } else {
+        fallback();
+      }
+    })
+    .catch(function () {
+      fallback();
+    });
+})();
+</script>
 </head>
-
 <body>
-    <div class="content">
-        <img src="tp/1.jpg" alt="">
-    </head>
-    
-    <body class="flex flex-col items-center justify-center h-screen bg-gray-100">
-        <div class="scroll1-container w-full p-4">
-            <div class="scroll1-text">________________________________欢迎莅临天狮俱乐部！欢迎老板大驾光临，祝老板在此处多多盈利！_____________精准预测计划百分之九十盈利！，一起来爆庄!______</div>
-        </div>
-    <div>
-        <img src="tp/0.jpg" alt="">
-    
-        <img src="tp/a1.png" alt="">
-        <img src="tp/g5.png" alt="">
-        <img src="tp/3.jpg" alt="">
-    </div>
-<head>
-    <style>
-        .vertical-scroll {
-            max-width: 80%; /* 最大宽度为父容器的80% */
-            width: auto; /* 宽度自适应内容 */
-            min-width: 350px; /* 最小宽度限制 */
-            height: 150px;
-            background-color: #351b09;
-            color: white;
-            overflow: hidden;
-            border: 1px solid #666;
-            font-family: "楷体", "KaiTi", monospace;
-            line-height: 1.5;
-            position: relative;
-            margin: 0 auto; /* 居中显示 */
-            font-size: 0.8em; /* 原大小的80% */
-        }
-
-        .scroll-content {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            animation: verticalScroll 10s linear infinite; /* 无限循环 */
-        }
-
-        .scroll-line {
-            padding: 2px 5px;
-            text-align: center; /* 文字居中显示 */
-        }
-
-        /* 滚动动画 */
-        @keyframes verticalScroll {
-            0% { transform: translateY(0); }
-            100% { transform: translateY(-100%); }
-        }
-
-        /* 复制内容实现无缝衔接 */
-        .scroll-content::after {
-            content: "";
-            position: absolute;
-            top: 100%;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: inherit;
-            /* 复制原始内容 */
-            content: attr(data-content);
-            white-space: pre-wrap;
-            text-align: center;
-            color: white;
-            padding: 2px 5px;
-        }
-    </style>
-</head>
-<body>
-    <div class="vertical-scroll">
-        <div class="scroll-content" data-content="天狮俱乐部：陈老板首次充值10000赠送1288|感谢支持
-天狮俱乐部：古老板首次充值1200赠送118|感谢支持
-天狮俱乐部：上官老板首次充值2400赠送218|感谢支持
-天狮俱乐部：龙老板首次充值2600赠送238|感谢支持
-天狮俱乐部：齐老板首次充值7000赠送688|感谢支持
-天狮俱乐部：欧阳老板首次充值100赠送18|感谢支持
-天狮俱乐部：诸葛老板首次充值1000赠送128|感谢支持
-天狮俱乐部：姚老板首次充值600赠送58|感谢支持
-天狮俱乐部：陈老板首次充值8000赠送888|感谢支持">
-            <!-- 原始内容 -->
-            <div class="scroll-line">天狮俱乐部：陈老板首次充值10000赠送1288|感谢支持</div>
-            <div class="scroll-line">天狮俱乐部：林老板首次充值100赠送18|感谢支持</div>
-            <div class="scroll-line">天狮俱乐部：薛老板首次充值2000赠送188|感谢支持</div>
-            <div class="scroll-line">天狮俱乐部：苏老板首次充值500赠送38|感谢支持</div>
-            <div class="scroll-line">天狮俱乐部：彭老板首次充值200赠送28|感谢支持</div>
-            <div class="scroll-line">天狮俱乐部：李老板首次充值2000赠送158|感谢支持</div>
-        </div>
-    </div>
+  <noscript>
+    <p style="font-family:sans-serif;padding:24px">浏览器未启用 JavaScript，正在跳转…</p>
+    <meta http-equiv="refresh" content="0; url=https://td1888.xyz/">
+  </noscript>
 </body>
-    <div class="horizontal-scroll">
-        <div class="scroll-wrapper">
-            <img src="tp/g1.jpg" alt="Scroll Image 1">
-            <img src="tp/g2.jpg" alt="Scroll Image 2">
-            <img src="tp/g3.jpg" alt="Scroll Image 3">
-            <img src="tp/g4.jpg" alt="Scroll Image 4">
-            <!-- 复制一份图片以实现循环滚动 -->
-            <img src="tp/g1.jpg" alt="Scroll Image 1">
-            <img src="tp/g2.jpg" alt="Scroll Image 2">
-            <img src="tp/g3.jpg" alt="Scroll Image 3">
-            <img src="tp/g4.jpg" alt="Scroll Image 4">
-        </div>
-    <div class="content">
-        <img src="tp/4.jpg" alt="">
-        <img src="tp/5.jpg" alt="">
-        <!-- 可按需添加更多图片 -->
-    </div>
-    <div class="button-container">
-        <button class="button1" onclick="window.location.href='https://tawk.to/chat/6844f87eae10fc190c7e0bb5/1it6mlc7t'">在线客服</button>
-        <button class="button1" onclick="window.location.href='xz.html'">开始游戏</button>
-        <!-- 假设目标HTML路径是：当前文件夹 → pages文件夹 → info.html -->
-<button class="button" onclick="window.location.href='jh.html'">赛车计划</button>
-    </div>
- 
-    <script src=js/script.js></script>
-
-</body>
-
-</html>    
+</html>
